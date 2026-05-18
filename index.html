@@ -1,201 +1,936 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>European Expedition: The Official 16-Day Review</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f6f8;
-            color: #333;
-        }
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        h1, h2, h3 {
-            color: #1a365d;
-        }
-        .audio-player {
-            background: #e2e8f0;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .slide {
-            border-bottom: 2px solid #e2e8f0;
-            padding: 30px 0;
-        }
-        .slide:last-child {
-            border-bottom: none;
-        }
-        .slide-img {
-            width: 100%;
-            max-height: 450px;
-            object-fit: cover;
-            border-radius: 6px;
-            margin: 20px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .caption {
-            font-style: italic;
-            color: #4a5568;
-            font-size: 0.95em;
-            margin-top: -10px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .meta {
-            font-size: 0.9em;
-            color: #4a5568;
-            margin-bottom: 20px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Switzerland & Beyond — Andrew, Heather & Bella · 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--pine:#2d4a3e;--pine2:#3d6454;--mist:#8ba89a;--gold:#c49a3c;--sky:#4a7fa5;--terracotta:#c75b39;--dark:#1a1a18;--mid:#4a4a46;--faint:#8a8a84;--bg:#faf8f4}
+html{scroll-behavior:smooth}
+body{font-family:'Crimson Pro',Georgia,serif;background:var(--bg);color:var(--dark);line-height:1.6}
+
+.site-header{background:var(--pine);color:#fff;text-align:center;padding:3.5rem 2rem 2.5rem;position:relative;overflow:hidden}
+.site-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent,transparent 40px,rgba(255,255,255,.025) 40px,rgba(255,255,255,.025) 80px)}
+.site-header h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.6rem);font-weight:400;letter-spacing:-1px;position:relative;line-height:1.1}
+.site-header .sub{font-style:italic;font-weight:300;font-size:1.05rem;color:rgba(255,255,255,.7);margin-top:.4rem;position:relative}
+.route-hdr{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:1.1rem;flex-wrap:wrap;font-size:.82rem;color:rgba(255,255,255,.5);position:relative}
+.route-hdr .stop{color:rgba(255,255,255,.9)}
+
+.player{background:rgba(45,74,62,.08);border:.5px solid rgba(45,74,62,.22);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .2s;margin:1.6rem 3rem 0}
+.player:hover{background:rgba(45,74,62,.14)}
+.play-btn{width:38px;height:38px;border-radius:50%;background:var(--pine);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.95rem;color:#fff;transition:transform .15s;user-select:none}
+.player:hover .play-btn{transform:scale(1.06)}
+.tk-info{flex:1;min-width:0}
+.tk-name{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--pine)}
+.tk-sub{font-size:.72rem;color:var(--mist);font-style:italic;margin-top:1px}
+.prog-wrap{display:flex;align-items:center;gap:8px;min-width:110px}
+.prog-bg{flex:1;height:3px;background:rgba(45,74,62,.15);border-radius:2px;overflow:hidden}
+.prog-fg{height:100%;width:0%;background:var(--pine);border-radius:2px;transition:width .4s}
+.time-txt{font-size:.68rem;color:var(--mist);min-width:28px;text-align:right}
+.audio-note{font-size:.72rem;color:var(--mist);font-style:italic;text-align:center;margin:.4rem 3rem 0}
+
+.layout{display:grid;grid-template-columns:1fr 390px;max-width:1440px;margin:0 auto}
+
+.map-panel{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;border-left:1px solid #ddd}
+#map{flex:1}
+.map-label{background:var(--pine);color:#fff;text-align:center;padding:9px 14px;font-family:'Playfair Display',serif;font-size:.82rem;font-style:italic;min-height:40px;display:flex;align-items:center;justify-content:center;line-height:1.35}
+.map-legend{display:flex;gap:12px;padding:6px 12px;background:#fff;font-size:.68rem;color:var(--mid);border-top:1px solid #eee;flex-wrap:wrap}
+.leg-i{display:flex;align-items:center;gap:4px}
+.leg-d{width:9px;height:9px;border-radius:50%}
+.leg-l{width:16px;height:2px}
+
+.journal{padding:0;max-width:860px}
+
+.chapter{padding:3.5rem 3rem;border-bottom:1px solid #e8e4dc;scroll-margin-top:20px}
+.chapter:last-child{border-bottom:none}
+.ch-eye{font-size:.72rem;font-style:italic;color:var(--mist);letter-spacing:.05em;margin-bottom:.3rem}
+.ch-title{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,3vw,2.3rem);font-weight:400;color:var(--pine);line-height:1.1;margin-bottom:.2rem}
+.ch-title.bcn{color:var(--terracotta)}
+.ch-dates{font-size:.78rem;color:var(--mist);font-style:italic;margin-bottom:1.5rem}
+
+.db{margin-bottom:2.6rem}
+.dl{display:inline-block;background:var(--pine);color:#fff;font-family:'Playfair Display',serif;font-size:.7rem;font-style:italic;padding:3px 11px;border-radius:3px;margin-bottom:.65rem;letter-spacing:.03em}
+.dl.bcn{background:var(--terracotta)}
+.dl.gold{background:var(--gold)}
+
+.cb{font-size:1.06rem;line-height:1.78;color:var(--mid);font-weight:300;margin-bottom:1rem}
+.cb em{font-style:italic;color:var(--dark);font-weight:400}
+
+.pq{border-left:3px solid var(--gold);padding:.45rem 1.3rem;margin:1.5rem 0;font-family:'Playfair Display',serif;font-style:italic;font-size:1.08rem;color:var(--pine);line-height:1.5}
+.pq.bcn{border-left-color:var(--terracotta)}
+
+.pg{display:grid;gap:5px;margin:.8rem 0}
+.pg.g1{grid-template-columns:1fr}
+.pg.g2{grid-template-columns:1fr 1fr}
+.pg.g3{grid-template-columns:1fr 1fr 1fr}
+.pg.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+.pw{position:relative;overflow:hidden;border-radius:4px;background:#e0dcd4;cursor:zoom-in;aspect-ratio:4/3}
+.pw.tall{aspect-ratio:3/4;grid-row:span 2}
+.pw.wide{aspect-ratio:16/9;grid-column:span 2}
+.pw.xwide{aspect-ratio:21/9;grid-column:span 3}
+.pw img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s ease}
+.pw:hover img{transform:scale(1.04)}
+.pc{position:absolute;bottom:0;left:0;right:0;padding:20px 8px 7px;background:linear-gradient(transparent,rgba(5,15,10,.68));color:rgba(255,255,255,.92);font-size:.68rem;font-style:italic;opacity:0;transition:opacity .3s;line-height:1.3}
+.pw:hover .pc{opacity:1}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:1.3rem}
+.chip{background:rgba(45,74,62,.07);border:.5px solid rgba(45,74,62,.2);border-radius:20px;padding:3px 12px;font-size:.74rem;color:var(--pine)}
+.chip.bcn{background:rgba(199,91,57,.07);border-color:rgba(199,91,57,.25);color:var(--terracotta)}
+
+.divider{text-align:center;color:var(--mist);letter-spacing:10px;font-size:.9rem;padding:.2rem 0}
+
+.lb{display:none;position:fixed;inset:0;z-index:9999;background:rgba(5,15,10,.92);align-items:center;justify-content:center;padding:2rem;cursor:zoom-out}
+.lb.open{display:flex}
+.lb img{max-width:90vw;max-height:88vh;object-fit:contain;border-radius:3px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.lb-x{position:fixed;top:18px;right:22px;color:rgba(255,255,255,.7);font-size:2.2rem;cursor:pointer;line-height:1}
+.lb-x:hover{color:#fff}
+
+.site-footer{background:var(--pine);color:rgba(255,255,255,.7);text-align:center;padding:3rem 2rem}
+.site-footer p{font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;color:rgba(255,255,255,.9);margin-bottom:.5rem}
+.site-footer small{font-size:.77rem}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .map-panel{position:relative;height:55vw;min-height:260px;max-height:380px;border-left:none;border-bottom:1px solid #ddd}
+  .chapter{padding:2.2rem 1.3rem}
+  .player,.audio-note{margin-left:1.3rem;margin-right:1.3rem}
+}
+</style>
 </head>
 <body>
 
-<div class="container">
-    <h1>European Expedition: The Official 16-Day Review</h1>
-    <p class="meta"><strong>Travelers:</strong> Andrew, Heather, Sue Noon, and John Noon</p>
+<header class="site-header">
+  <h1>Switzerland &amp; Beyond</h1>
+  <div class="sub">Andrew, Heather &amp; Bella · April – May 2026</div>
+  <div class="route-hdr">
+    <span class="stop">Brisbane</span><span>→</span>
+    <span class="stop">Zürich</span><span>→</span>
+    <span class="stop">Barcelona</span><span>→</span>
+    <span class="stop">Zürich</span><span>→</span>
+    <span class="stop">Interlaken</span><span>→</span>
+    <span class="stop">Brisbane</span>
+  </div>
+</header>
 
-    <!-- Background Music Player Widget -->
-    <div class="audio-player">
-        <div>
-            <strong>Ambient Soundscape:</strong> Alpine Symphony (Acoustic Guitar & Nature Sounds)
-        </div>
-        <audio controls loop autoplay>
-            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-    </div>
+<div class="player" id="playerBar" onclick="togglePlay()" role="button" aria-label="Play soundtrack">
+  <div class="play-btn" id="playBtn">▶</div>
+  <div class="tk-info">
+    <div class="tk-name" id="tkName">Morning Meadow — Wind &amp; Cow Bells</div>
+    <div class="tk-sub" id="tkSub">Click to play the alpine soundscape · 5 nature movements</div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-bg"><div class="prog-fg" id="progFg"></div></div>
+    <div class="time-txt" id="timeTxt">0:00</div>
+  </div>
+</div>
+<div class="audio-note">Generative music via Web Audio API · no external files · press play and scroll</div>
 
-    <!-- PART 1 -->
-    <div class="slide">
-        <h2>Part 1: The Initial Alpine Marvels (Days 1–4)</h2>
-        <h3>Day 1: Arrival & The Mighty Rhine Falls</h3>
-        <p>Our Swiss adventure commenced in Northern Switzerland. We explored the historic town of Stein am Rhein before witnessing the immense power of nature at the Rhine Falls, capturing our first group photos against the roaring mist.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1626259042511-bdfc08fbf957?auto=format&fit=crop&w=1200&q=80" alt="Rhine Falls">
-        <div class="caption">Visual Record: The roaring cascades of Rhine Falls with the historic castle on the cliffside.</div>
-    </div>
+<div class="layout">
+<main class="journal">
 
-    <div class="slide">
-        <h3>Day 2: Historic Lucerne & Lake Horizons</h3>
-        <p>We explored the iconic lakeside city of Lucerne, walking across the world-famous Chapel Bridge (Kapellbrücke) to admire the historic ceiling panels, and paid our respects at the moving Lion Monument.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1594895745423-7fa7f7ef07e3?auto=format&fit=crop&w=1200&q=80" alt="Lucerne Chapel Bridge">
-        <div class="caption">Visual Record: Walking along the wooden rafters of the landmark Kapellbrücke with the water tower reflecting in the river.</div>
-    </div>
+<!-- ══════════════ CH1 ══════════════ -->
+<article class="chapter" id="ch1" data-chapter="1">
+<div class="ch-eye">Chapter I</div>
+<h2 class="ch-title">Brisbane to Zürich — The Adventure Begins</h2>
+<div class="ch-dates">19 – 23 April 2026</div>
 
-    <div class="slide">
-        <h3>Day 3: Valley of 72 Waterfalls – Lauterbrunnen</h3>
-        <p>We ventured into the stunning U-shaped valley of Lauterbrunnen, marveling at Staubbach Falls plunging nearly 300 meters from the overhanging cliffs against a dramatic mountain backdrop.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80" alt="Lauterbrunnen Valley">
-        <div class="caption">Visual Record: The dramatic valley floor with Staubbach Falls dropping off the massive sheer cliffs.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 4: Grindelwald & Alpine Trails</h3>
-        <p>We climbed up to the alpine chalet village of Grindelwald at the foot of the Eiger North Face, exploring local paths and preparing for our departure to Spain.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80" alt="Grindelwald Alpine Meadows">
-        <div class="caption">Visual Record: Beautiful Grindelwald trails facing the base of the massive mountain peaks.</div>
-    </div>
-
-    <!-- PART 2 -->
-    <div class="slide">
-        <h2>Part 2: The Catalan Charm of Barcelona (Days 5–7)</h2>
-        <h3>Day 5: Arrival in Catalonia & The Gothic Quarter</h3>
-        <p>We traded the snowy peaks for coastal Mediterranean air, flying south to Barcelona, Spain. We spent our first evening exploring the historic, stone-cut labyrinth of the Gothic Quarter.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1583779457094-0cdcf2b1f28b?auto=format&fit=crop&w=1200&q=80" alt="Barcelona Gothic Quarter">
-        <div class="caption">Visual Record: The beautiful narrow stone alleys of the Gothic Quarter at twilight.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 6: Antoni Gaudí's Masterpiece – Sagrada Família</h3>
-        <p>We stood in complete awe inside the central nave of the Sagrada Família, capturing the brilliant crimson, orange, and deep blue light of the morning sun streaming through the stained-glass windows.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1200&q=80" alt="Sagrada Familia Interior">
-        <div class="caption">Visual Record: Intricate stained-glass light display splashing rich crimsons and blues inside the main nave.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 7: Coastal Barcelona Exploration</h3>
-        <p>We spent the day taking in the vibrant architecture of the Eixample district and enjoying a celebratory Spanish tapas dinner along the coast.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1539650116574-8efeb43e2750?auto=format&fit=crop&w=1200&q=80" alt="Barcelona Coastline">
-        <div class="caption">Visual Record: Looking out onto the Mediterranean coast line from the edge of the vibrant city.</div>
-    </div>
-
-    <!-- PART 3 -->
-    <div class="slide">
-        <h2>Part 3: The Extended Swiss Alps Return Leg (Days 8–16)</h2>
-        <h3>Day 8: Return to Switzerland & Base Setup</h3>
-        <p>Flying back to Switzerland, we re-entered the familiar peaks of the Bernese Oberland, establishing our mountain base near the serene village of Ringgenberg on Lake Brienz.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1527668752968-14dc70a27c95?auto=format&fit=crop&w=1200&q=80" alt="Swiss Mountain Lake">
-        <div class="caption">Visual Record: Re-entering the deep, quiet mountain valleys as evening descends on the region.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 9: Lake Brienz Cruise & Iseltwald Pier</h3>
-        <p>We boarded a passenger vessel for a relaxing cruise across the turquoise waters of Lake Brienz and stopped at the pristine lakeside village of Iseltwald to walk down its famous wooden pier.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1549880338-65ddcdfd017b?auto=format&fit=crop&w=1200&q=80" alt="Iseltwald Pier Lake Brienz">
-        <div class="caption">Visual Record: Looking down the wooden pier into the vibrant, crystal-clear turquoise waters of Lake Brienz.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 10: High Vistas from Beatenberg</h3>
-        <p>We ascended to Beatenberg, perched high above Lake Thun. The vantage point offered a flawless panoramic view looking down on Interlaken and across to the icy peaks of the Eiger, Mönch, and Jungfrau.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80" alt="Beatenberg Panoramic Mountain View">
-        <div class="caption">Visual Record: Panoramic overview from Beatenberg, looking down onto the valley and deep blue lakes below.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 11: First Cliff Walk Suspension Trail</h3>
-        <p>Heading above Grindelwald, we took the cable car to First and tested our nerves on the Cliff Walk suspension pathway bolted directly into the sheer face of the mountain.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?auto=format&fit=crop&w=1200&q=80" alt="First Cliff Walk Suspension">
-        <div class="caption">Visual Record: A thrilling perspective looking down the suspension pathway clinging to the sheer rock wall of First.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 12: Woodworking Heritage in Brienz Village</h3>
-        <p>We visited the historic village of Brienz, strolling down Brunngasse to admire the traditional 18th-century timber chalets covered in intricate wood carvings.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=80" alt="Swiss Wood Chalets">
-        <div class="caption">Visual Record: Beautiful timber craftsmanship on traditional mountain houses lined with summer flower boxes.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 13: St. Beatus Caves Exploration</h3>
-        <p>We journeyed into the St. Beatus Caves system, tracing safely lit stone pathways deep inside the mountain past massive stalactites and roaring underground waterfalls.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80" alt="Caves Waterflow">
-        <div class="caption">Visual Record: Watching the water rushing out from the beautifully illuminated cave entries.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 14: High Alpine Peak – Jungfraujoch</h3>
-        <p>Later in our schedule, we boarded the historic cogwheel railway to ascend to Jungfraujoch at 3,454 meters. We stepped onto the Sphinx Observatory terrace to view the sprawling Aletsch Glacier and explored the shimmering Ice Palace tunnels.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1548777123-e216912df7d8?auto=format&fit=crop&w=1200&q=80" alt="Jungfraujoch Sphinx Observatory">
-        <div class="caption">Visual Record: The high-altitude Sphinx Observatory perched on the snow-covered ridge of Jungfraujoch.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 15: Car-Free Village of Mürren</h3>
-        <p>We crossed to the opposite side of the Lauterbrunnen valley to visit the spectacular, vehicle-free village of Mürren on a high cliff shelf, giving us a close-up look at the alpine giants.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1482862549707-f63cb32c5fd9?auto=format&fit=crop&w=1200&q=80" alt="Murren Cliff Village">
-        <div class="caption">Visual Record: Mürren cliff village facing right into the magnificent faces of the Bernese trilogy.</div>
-    </div>
-
-    <div class="slide">
-        <h3>Day 16: Deep Alpine Trails & Farewell Celebration</h3>
-        <p>We spent our final day tracking local valley trails before gathering for a family farewell dinner, toasting to an unforgettable 16-day journey as the twilight glow illuminated the snow-capped Bernese peaks.</p>
-        <img class="slide-img" src="https://images.unsplash.com/photo-1491555103944-7c647fd857e6?auto=format&fit=crop&w=1200&q=80" alt="Alpine Sunset Twilight">
-        <div class="caption">Visual Record: The final group photo capturing the twilight glow illuminating the snow-capped peaks.</div>
-    </div>
+<div class="db">
+<span class="dl">Sunday 19 April — Departure from Brisbane</span>
+<p class="cb">With bags packed, passports checked and a palpable sense of excitement, <em>Andrew and Heather</em> set off from Brisbane on the 19th of April, bound for Switzerland. The journey ahead was a long one — Singapore Airlines' <em>SQ346</em> route carrying them north-west through the night, via a connection at <em>Changi Airport</em>, before the final leg deposited them wide-eyed at <em>Zürich Flughafen</em> on the morning of the 20th. After close to 24 hours in transit, a brisk hop on the S-Bahn into the city and a very welcome check-in at <em>Easy Hotel on Heinrichstrasse</em> in the hip Kreis 4 neighbourhood, they were finally, properly, in Switzerland.</p>
 </div>
 
+<div class="db">
+<span class="dl">Tuesday 21 April — Exploring Zürich</span>
+<p class="cb">Jet lag was largely ignored on the 21st as Andrew and Heather threw themselves into the city. Zürich proved to be everything the guides promised — the <em>Altstadt</em> with its twin towers, the <em>Limmat</em> riverbanks glittering in spring sunshine, tram rides along the lake, and the trendy Kreis 4 and 5 districts right on their doorstep. Foraging for places to eat and sitting in bars watching the world go by was a lovely way to spend the day, including a short trip up the <em>Funicular</em> to the city hall.</p>
+<div class="pg g1">
+  <div class="pw" style="aspect-ratio:16/9" onclick="lb('1msTAZrCtJ0fv-UJqqYPeoEUTZ0QhBpr-')"><img src="https://drive.google.com/thumbnail?id=1msTAZrCtJ0fv-UJqqYPeoEUTZ0QhBpr-&sz=w900" alt="Zürich" loading="lazy"><div class="pc">Zürich, 21 April</div></div>
+</div>
+</div>
+
+<div class="db">
+<span class="dl">Wednesday 22 April — Stein am Rhein &amp; Rhine Falls</span>
+<p class="cb">The 22nd saw Andrew and Heather venture out of the city on what became one of the highlights of their Zürich days. The morning was spent in <em>Stein am Rhein</em> — a medieval gem on the Rhine where the central <em>Rathausplatz</em> is lined with elaborately frescoed facades dating back centuries. They wandered the cobbled lanes and visited <em>St. George's Abbey</em> before heading west to the main event: <em>Rhine Falls</em>. Europe's largest waterfall didn't disappoint. Some 600,000 litres of water per second thunder over the basalt rock, sending a permanent mist drifting across the viewing platforms and a satisfying roar through the valley. Andrew had the DSLR out and made the most of it.</p>
+<div class="pg g3">
+  <div class="pw tall" onclick="lb('1ec-Oxw2aZec-o8_V4QTr1dNKrYVVzjxS')"><img src="https://drive.google.com/thumbnail?id=1ec-Oxw2aZec-o8_V4QTr1dNKrYVVzjxS&sz=w700" alt="Stein am Rhein" loading="lazy"><div class="pc">Stein am Rhein</div></div>
+  <div class="pw" onclick="lb('1RbQFBdJ5CZGqO43ToNMW3TN-sC0Z3kwd')"><img src="https://drive.google.com/thumbnail?id=1RbQFBdJ5CZGqO43ToNMW3TN-sC0Z3kwd&sz=w500" alt="22 April" loading="lazy"><div class="pc">22 April</div></div>
+  <div class="pw" onclick="lb('1aX4sDiw3S_mb6F5jemSZYeSV9cFbityj')"><img src="https://drive.google.com/thumbnail?id=1aX4sDiw3S_mb6F5jemSZYeSV9cFbityj&sz=w500" alt="Stein am Rhein" loading="lazy"><div class="pc">Stein am Rhein</div></div>
+  <div class="pw" onclick="lb('12hTYsFhNLFNTzPkFcbuz7ylRMguHyTlK')"><img src="https://drive.google.com/thumbnail?id=12hTYsFhNLFNTzPkFcbuz7ylRMguHyTlK&sz=w500" alt="Rhine" loading="lazy"><div class="pc">The Rhine</div></div>
+  <div class="pw" onclick="lb('1od4yjGoKtJGGAIaDSeSyYoWf0M7D5dUp')"><img src="https://drive.google.com/thumbnail?id=1od4yjGoKtJGGAIaDSeSyYoWf0M7D5dUp&sz=w500" alt="Rhine Falls" loading="lazy"><div class="pc">Rhine Falls</div></div>
+  <div class="pw" onclick="lb('1evQuko2l-x66NifnBsgQgOij0I_xdjj9')"><img src="https://drive.google.com/thumbnail?id=1evQuko2l-x66NifnBsgQgOij0I_xdjj9&sz=w500" alt="Rhine Falls" loading="lazy"><div class="pc">Rhine Falls</div></div>
+</div>
+<div class="pg g3">
+  <div class="pw xwide" onclick="lb('1NMnYXIPRRE1VGmrTkrqzzXq2NdBPdb8h')"><img src="https://drive.google.com/thumbnail?id=1NMnYXIPRRE1VGmrTkrqzzXq2NdBPdb8h&sz=w1000" alt="Rhine Falls wide" loading="lazy"><div class="pc">Rhine Falls — Europe's largest waterfall · DSLR</div></div>
+</div>
+<div class="pg g2">
+  <div class="pw" onclick="lb('18hvEefhxRyjM8eMQmdrTLg9oQXIb3Pun')"><img src="https://drive.google.com/thumbnail?id=18hvEefhxRyjM8eMQmdrTLg9oQXIb3Pun&sz=w600" alt="Rhine Falls" loading="lazy"><div class="pc">Rhine Falls</div></div>
+  <div class="pw" onclick="lb('13aMmRbAP6xyY9450Uv-sYEQgy6tL4L3W')"><img src="https://drive.google.com/thumbnail?id=13aMmRbAP6xyY9450Uv-sYEQgy6tL4L3W&sz=w600" alt="Rhine Falls waterfall" loading="lazy"><div class="pc">The plunge — DSC_0088 · DSLR</div></div>
+  <div class="pw" onclick="lb('16_3b_yvh2h5T4UEaTSdAFnafgUncioOJ')"><img src="https://drive.google.com/thumbnail?id=16_3b_yvh2h5T4UEaTSdAFnafgUncioOJ&sz=w600" alt="Rhine Falls" loading="lazy"><div class="pc">Rhine Falls · DSLR</div></div>
+</div>
+</div>
+
+<div class="db">
+<span class="dl">Thursday 23 April — St. Beatus-Höhlen, Swiss Caves</span>
+<p class="cb">Before Barcelona beckoned, Andrew and Heather squeezed in one more Swiss experience — the extraordinary <em>St. Beatus-Höhlen</em>, carved by an underground river into the steep limestone cliffs above the northern shore of <em>Lake Thun</em>. Legend holds these caves were once lair to a dragon, dispatched by the hermit monk St. Beatus himself. The reality — kilometre after kilometre of stalactites, underground waterfalls, and rushing subterranean streams — was dramatic enough without the mythology. It proved the perfect send-off before heading to the airport for the afternoon flight south.</p>
+<div class="pg g3">
+  <div class="pw tall" onclick="lb('1IMGW5S6Tq_a1-Ad39y_36LCN_fCpx3ms')"><img src="https://drive.google.com/thumbnail?id=1IMGW5S6Tq_a1-Ad39y_36LCN_fCpx3ms&sz=w700" alt="St Beatus Caves" loading="lazy"><div class="pc">St. Beatus-Höhlen, 23 April</div></div>
+  <div class="pw" onclick="lb('1AiKIn05tUaAbegA5_shbe6Jy5GzXNgg0')"><img src="https://drive.google.com/thumbnail?id=1AiKIn05tUaAbegA5_shbe6Jy5GzXNgg0&sz=w500" alt="St Beatus Caves" loading="lazy"><div class="pc">Inside the caves</div></div>
+  <div class="pw" onclick="lb('1Qk5ChiDsxwLzjEGThLbYzsYWzeqgI2bl')"><img src="https://drive.google.com/thumbnail?id=1Qk5ChiDsxwLzjEGThLbYzsYWzeqgI2bl&sz=w500" alt="St Beatus Caves" loading="lazy"><div class="pc">St. Beatus-Höhlen</div></div>
+  <div class="pw" onclick="lb('1dznj79V7ZIEn_evVCm7vy7oPXBA113iB')"><img src="https://drive.google.com/thumbnail?id=1dznj79V7ZIEn_evVCm7vy7oPXBA113iB&sz=w500" alt="St Beatus Caves" loading="lazy"><div class="pc">Underground waterfalls</div></div>
+  <div class="pw" onclick="lb('10fafvb3w7pmbu6rsLIdtKnadGpQ7D4Gr')"><img src="https://drive.google.com/thumbnail?id=10fafvb3w7pmbu6rsLIdtKnadGpQ7D4Gr&sz=w500" alt="St Beatus Caves" loading="lazy"><div class="pc">Stalactites, 23 April</div></div>
+  <div class="pw" onclick="lb('1zNneY5mjyhQV3HPKqud_D-IbQJ4k4MHK')"><img src="https://drive.google.com/thumbnail?id=1zNneY5mjyhQV3HPKqud_D-IbQJ4k4MHK&sz=w500" alt="St Beatus Caves" loading="lazy"><div class="pc">St. Beatus-Höhlen</div></div>
+  <div class="pw" onclick="lb('18LJYHLuEs4H7Il3dVGtmnctIICtjsTef')"><img src="https://drive.google.com/thumbnail?id=18LJYHLuEs4H7Il3dVGtmnctIICtjsTef&sz=w500" alt="St Beatus Caves" loading="lazy"><div class="pc">St. Beatus-Höhlen, 23 April</div></div>
+  <div class="pw" onclick="lb('1lYiE-ptdv1Dwx7yfQCtS_SH6XvBmrDxF')"><img src="https://drive.google.com/thumbnail?id=1lYiE-ptdv1Dwx7yfQCtS_SH6XvBmrDxF&sz=w500" alt="St Beatus Caves" loading="lazy"><div class="pc">St. Beatus-Höhlen, 23 April</div></div>
+</div>
+</div>
+
+<div class="chips">
+  <span class="chip">Easy Hotel, Heinrichstrasse · 3 nights</span>
+  <span class="chip">Singapore Airlines SQ346</span>
+  <span class="chip">Stein am Rhein — 22 Apr</span>
+  <span class="chip">Rhine Falls — 22 Apr</span>
+  <span class="chip">St. Beatus-Höhlen — 23 Apr</span>
+</div>
+</article>
+
+<div class="divider">· · ·</div>
+
+<!-- ══════════════ CH2 ══════════════ -->
+<article class="chapter" id="ch2" data-chapter="2">
+<div class="ch-eye">Chapter II</div>
+<h2 class="ch-title bcn">¡Bienvenidos a Barcelona!</h2>
+<div class="ch-dates">23 – 27 April 2026</div>
+
+<div class="db">
+<span class="dl bcn">Thursday 23 April — Sant Jordi &amp; Arrival</span>
+<p class="cb">Swiss Air <em>LX1952</em> deposited Andrew and Heather into warm Mediterranean sunshine on 23 April — and what a day to arrive. It was <em>La Diada de Sant Jordi</em>, Catalonia's beloved festival of roses and books: tradition demands that lovers exchange a red rose and a novel, and the entire city had taken the brief seriously. Every street corner was stacked with flowers; booksellers had colonised the footpaths of the <em>Gothic Quarter</em>. The <em>Ajuntament de Barcelona</em> threw open its magnificent Gothic halls for a public open day, and Andrew and Heather walked straight in. They checked into <em>Hostal Drassanes</em>, a ten-minute walk from the harbour and the foot of <em>La Rambla</em> — a superb base for everything that followed.</p>
+<div class="pg g3">
+  <div class="pw tall" onclick="lb('1Bz2AVlNnEQNk_Gr-Ni6VZyJS9KXQktjD')"><img src="https://drive.google.com/thumbnail?id=1Bz2AVlNnEQNk_Gr-Ni6VZyJS9KXQktjD&sz=w700" alt="Sant Jordi" loading="lazy"><div class="pc">Sant Jordi open day — the Ajuntament</div></div>
+  <div class="pw" onclick="lb('1hRvCi0cJ86NO3aOGBB0UC_H1TxBn-y9D')"><img src="https://drive.google.com/thumbnail?id=1hRvCi0cJ86NO3aOGBB0UC_H1TxBn-y9D&sz=w500" alt="Barcelona 23 Apr" loading="lazy"><div class="pc">Barcelona, 23 April</div></div>
+  <div class="pw" onclick="lb('15lbsAzoEWhxTr6xkA-UG11DZ9THZeWnC')"><img src="https://drive.google.com/thumbnail?id=15lbsAzoEWhxTr6xkA-UG11DZ9THZeWnC&sz=w500" alt="Barcelona arrival" loading="lazy"><div class="pc">Arrival day, 23 April</div></div>
+  <div class="pw" onclick="lb('18e0e6_DDfUrbD-fSfXo-F2NESYsylWS6')"><img src="https://drive.google.com/thumbnail?id=18e0e6_DDfUrbD-fSfXo-F2NESYsylWS6&sz=w500" alt="Barcelona" loading="lazy"><div class="pc">Barcelona streets</div></div>
+</div>
+<div class="pq bcn">"The streets were covered in roses. Every corner had a book stall. They'd landed right in the middle of Catalonia's most loved celebration — on the one day of the year that Barcelona gives itself entirely over to romance."</div>
+</div>
+
+<div class="db">
+<span class="dl bcn">Friday 24 – Sunday 26 April — City Days</span>
+<p class="cb">Three full days to absorb one of Europe's great cities. They threaded through the <em>Gothic Quarter's</em> labyrinthine lanes, followed the modernisme trail along the <em>Eixample</em>, and completed the Gaudí pilgrimage: <em>Sagrada Família</em> (booked weeks in advance, worth every minute of the queue), <em>Casa Batlló</em>, <em>Park Güell</em>. The architecture doesn't just impress — it genuinely astonishes. Evenings were spent at <em>Barceloneta</em> seafood restaurants where dinner never started before half nine, the wine was always cold, and the company was always good.</p>
+<div class="pg g2">
+  <div class="pw tall" onclick="lb('1LsLXzwqShY_rkruucJYDTQH_ooLp600G')"><img src="https://drive.google.com/thumbnail?id=1LsLXzwqShY_rkruucJYDTQH_ooLp600G&sz=w700" alt="Barcelona 24 Apr" loading="lazy"><div class="pc">Barcelona, 24 April</div></div>
+  <div class="pw" onclick="lb('1P5fvdFvrFmuBvsk0InqhF05Fw26NBL6P')"><img src="https://drive.google.com/thumbnail?id=1P5fvdFvrFmuBvsk0InqhF05Fw26NBL6P&sz=w500" alt="Barcelona 24 Apr" loading="lazy"><div class="pc">24 April</div></div>
+  <div class="pw" onclick="lb('1BGdjME99t3bUeizzlYTly5sUB3g2num_')"><img src="https://drive.google.com/thumbnail?id=1BGdjME99t3bUeizzlYTly5sUB3g2num_&sz=w500" alt="Barcelona evening 24 Apr" loading="lazy"><div class="pc">Evening, 24 April</div></div>
+  <div class="pw" onclick="lb('1EJhFj5B2P2C8_Bd10hNhnqMJrYdPtD2m')"><img src="https://drive.google.com/thumbnail?id=1EJhFj5B2P2C8_Bd10hNhnqMJrYdPtD2m&sz=w500" alt="Barcelona 25 Apr" loading="lazy"><div class="pc">25 April</div></div>
+  <div class="pw" onclick="lb('1jKnx0KVKtfY-r8qVGZyl3A3mBYDry5XV')"><img src="https://drive.google.com/thumbnail?id=1jKnx0KVKtfY-r8qVGZyl3A3mBYDry5XV&sz=w500" alt="Barcelona 26 Apr" loading="lazy"><div class="pc">26 April</div></div>
+
+</div>
+<div class="pg g2">
+  <div class="pw" onclick="lb('1ZaKodHbcgVY57qxNH0CvDPwdESq7A5lY')"><img src="https://drive.google.com/thumbnail?id=1ZaKodHbcgVY57qxNH0CvDPwdESq7A5lY&sz=w500" alt="Barcelona" loading="lazy"><div class="pc">Barcelona</div></div>
+  <div class="pw" onclick="lb('1nLtzt2mOuYFUs7szf2z-QA6whno_S91I')"><img src="https://drive.google.com/thumbnail?id=1nLtzt2mOuYFUs7szf2z-QA6whno_S91I&sz=w500" alt="Barcelona" loading="lazy"><div class="pc">Barcelona</div></div>
+</div>
+</div>
+<div class="chips">
+  <span class="chip bcn">Hostal Drassanes, Gothic Quarter · 4 nights</span>
+  <span class="chip bcn">Swiss Air LX1952</span>
+  <span class="chip bcn">Sant Jordi — 23 April</span>
+  <span class="chip bcn">Sagrada Família · Park Güell · Barceloneta</span>
+</div>
+</article>
+
+<div class="divider">· · ·</div>
+
+<!-- ══════════════ CH3 ══════════════ -->
+<article class="chapter" id="ch3" data-chapter="3">
+<div class="ch-eye">Chapter III</div>
+<h2 class="ch-title">Zürich — The Family Assembles</h2>
+<div class="ch-dates">27 April – 1 May 2026</div>
+
+<div class="db">
+<span class="dl">Monday 27 April — Bella joins; John &amp; Sue arrive from Manchester</span>
+<p class="cb">The 27th of April was a day of beautiful reunions at Zürich Airport. Andrew and Heather flew back from Barcelona on <em>LX1951</em>, and there to meet them was <em>Bella</em>, who had made her own way to Zürich and was waiting with a grin. Almost simultaneously, <em>EZY2193</em> touched down from <em>Manchester</em> carrying Andrew's parents, <em>John and Sue</em>, who had been watching the itinerary with barely-contained excitement for weeks. All five relocated to the <em>Viadukt Apartments on Josefstrasse</em> — a proper flat with room to breathe, right in the same Kreis 5 neighbourhood they already knew and loved. That evening, squeezed around a table in one of the Viadukt arches, the group raised a glass to the week ahead.</p>
+<div class="pg g2">
+  <div class="pw" onclick="lb('1xLB6VYRefu8iiJh7LKE87gsm37v1yPkL')"><img src="https://drive.google.com/thumbnail?id=1xLB6VYRefu8iiJh7LKE87gsm37v1yPkL&sz=w500" alt="27 April" loading="lazy"><div class="pc">27 April — the gang's all here</div></div>
+  <div class="pw" onclick="lb('1f8DdouG_JhgtwcYcDnr284F6U2JV_iQr')"><img src="https://drive.google.com/thumbnail?id=1f8DdouG_JhgtwcYcDnr284F6U2JV_iQr&sz=w500" alt="27 April" loading="lazy"><div class="pc">27 April</div></div>
+</div>
+</div>
+
+<div class="db">
+<span class="dl">Tuesday 28 April — Day Trip: Lucerne &amp; the Lion Monument</span>
+<p class="cb">With the Swiss Travel Pass loaded onto everyone's phones, the group boarded the direct train to <em>Lucerne</em> — 45 minutes and a world away. The <em>Chapel Bridge</em> with its painted medieval panels, the gleaming lakefront, and the famous <em>Lion Monument</em> all featured. It was Thorvaldsen's dying lion, carved directly into a cliff face, that stopped everyone in their tracks. Commemorating the Swiss Guards who gave their lives defending the French royal family in 1792, it carries a quiet, sorrowful dignity that no photograph quite captures. <em>Mark Twain</em> called it the most mournful piece of stone in the world. Hard to argue.</p>
+<div class="pg g2">
+  <div class="pw tall" onclick="lb('1u5x4zA74UvPKT5KzbAmlJOJjrHR2vPsA')"><img src="https://drive.google.com/thumbnail?id=1u5x4zA74UvPKT5KzbAmlJOJjrHR2vPsA&sz=w700" alt="Lion Monument Lucerne" loading="lazy"><div class="pc">The Lion Monument, Lucerne — 28 April</div></div>
+  <div class="pw" onclick="lb('1hYadtMB9tiOVmOmHqBL-oiLr9RcHCb45')"><img src="https://drive.google.com/thumbnail?id=1hYadtMB9tiOVmOmHqBL-oiLr9RcHCb45&sz=w500" alt="Lucerne 28 Apr" loading="lazy"><div class="pc">Lucerne, 28 April</div></div>
+  <div class="pw" onclick="lb('169t8DRlfx5C5aIrhKsIDn6Fy2v_seU1d')"><img src="https://drive.google.com/thumbnail?id=169t8DRlfx5C5aIrhKsIDn6Fy2v_seU1d&sz=w500" alt="Lion Monument inscription" loading="lazy"><div class="pc">The inscription — Latin memorial to the fallen Guards</div></div>
+  <div class="pw" onclick="lb('1puwQ10DbSUu5x_PQKRn1NWi-cxRsGbzb')"><img src="https://drive.google.com/thumbnail?id=1puwQ10DbSUu5x_PQKRn1NWi-cxRsGbzb&sz=w500" alt="Lucerne 28 Apr" loading="lazy"><div class="pc">Lucerne, 28 April</div></div>
+</div>
+</div>
+
+<div class="db">
+<span class="dl">Wednesday 29 April — Day Trip: Rhine Falls (again)</span>
+<p class="cb">John and Sue needed to see the Rhine Falls. The Neuhausen side of the river offers a lift directly down to the water level, making it entirely accessible, and the <em>Yellow Boat</em> tour carries visitors right into the spray at the base of the falls — an experience that is simultaneously exhilarating and simply very, very wet. The group was suitably drenched and delighted.</p>
+<div class="pg g3">
+  <div class="pw wide" onclick="lb('1TKBkWpmAijlCpJYfIooseG0pHePfugpz')"><img src="https://drive.google.com/thumbnail?id=1TKBkWpmAijlCpJYfIooseG0pHePfugpz&sz=w900" alt="Rhine Falls panorama" loading="lazy"><div class="pc">Rhine Falls panorama — 29 April</div></div>
+</div>
+<div class="pg g3">
+  <div class="pw" onclick="lb('1XQjJEpsfxiJa5zfb4qSLdQ4qWMRh-VZb')"><img src="https://drive.google.com/thumbnail?id=1XQjJEpsfxiJa5zfb4qSLdQ4qWMRh-VZb&sz=w500" alt="Rhine Falls 29 Apr" loading="lazy"><div class="pc">Rhine Falls, 29 April</div></div>
+  <div class="pw" onclick="lb('1bNNZ-jLPVqElLjG_N8PcMN2tHKyHOPQ4')"><img src="https://drive.google.com/thumbnail?id=1bNNZ-jLPVqElLjG_N8PcMN2tHKyHOPQ4&sz=w500" alt="Rhine Falls" loading="lazy"><div class="pc">Rhine Falls</div></div>
+  <div class="pw" onclick="lb('1k-2ay6Up-BYlHwOdCNOPLNtfZZSJTfmD')"><img src="https://drive.google.com/thumbnail?id=1k-2ay6Up-BYlHwOdCNOPLNtfZZSJTfmD&sz=w500" alt="Rhine Falls 29 Apr" loading="lazy"><div class="pc">Rhine Falls</div></div>
+</div>
+</div>
+
+<div class="db">
+<span class="dl">Thursday 30 April — Zürich by Tram, Train &amp; Boat</span>
+<p class="cb">The 30th was Zürich itself — properly and unhurriedly. The group spent the day threading through the city on its legendary public transport network: trams along the Bahnhofstrasse, the <em>Polybahn</em> funicular up to the <em>ETH Terrace</em> for city panoramas, and in the afternoon a <em>Lake Zürich</em> boat cruise all the way down to <em>Rapperswil</em> — the "Town of Roses" — 100% free on the Swiss Travel Pass. The two-hour glide along the lake, the Alps growing ever taller on the horizon, was exactly the kind of effortless, sumptuous experience Switzerland does so well.</p>
+<div class="pg g4">
+  <div class="pw" onclick="lb('1jdYfA1Cvlw0kYblImW4YTcP0j_Eqdits')"><img src="https://drive.google.com/thumbnail?id=1jdYfA1Cvlw0kYblImW4YTcP0j_Eqdits&sz=w400" alt="30 April Zürich" loading="lazy"><div class="pc">Zürich, 30 April</div></div>
+  <div class="pw" onclick="lb('1Z-YdljMjZ4s1LUm_eyun6gbNINHQAyQF')"><img src="https://drive.google.com/thumbnail?id=1Z-YdljMjZ4s1LUm_eyun6gbNINHQAyQF&sz=w400" alt="Lake Zürich" loading="lazy"><div class="pc">Lake Zürich cruise</div></div>
+  <div class="pw" onclick="lb('1mgd65tomQGvKPGD7wFK8iJYgZWzahexE')"><img src="https://drive.google.com/thumbnail?id=1mgd65tomQGvKPGD7wFK8iJYgZWzahexE&sz=w400" alt="30 April" loading="lazy"><div class="pc">30 April</div></div>
+  <div class="pw" onclick="lb('1wHdMQtLFwtNltBHJXhCGVppET9O9F-JP')"><img src="https://drive.google.com/thumbnail?id=1wHdMQtLFwtNltBHJXhCGVppET9O9F-JP&sz=w400" alt="Evening 30 April" loading="lazy"><div class="pc">Evening, 30 April</div></div>
+</div>
+</div>
+
+<div class="chips">
+  <span class="chip">Viadukt Apartments, Josefstrasse · 4 nights</span>
+  <span class="chip">Bella joins the party</span>
+  <span class="chip">John &amp; Sue from Manchester</span>
+  <span class="chip">Lucerne — Lion Monument</span>
+  <span class="chip">Rhine Falls</span>
+  <span class="chip">Lake Zürich to Rapperswil</span>
+</div>
+</article>
+
+<div class="divider">· · ·</div>
+
+<!-- ══════════════ CH4 ══════════════ -->
+<article class="chapter" id="ch4" data-chapter="4">
+<div class="ch-eye">Chapter IV</div>
+<h2 class="ch-title">Interlaken &amp; the High Alps</h2>
+<div class="ch-dates">1 – 5 May 2026</div>
+
+<div class="db">
+<span class="dl">Friday 1 May — The Train Journey to Interlaken</span>
+<p class="cb">The morning of 1 May saw five very excited people boarding a direct InterCity train at Zürich Hauptbahnhof. As it wound south through the Swiss Mittelland and into the Bernese Oberland, the landscape transformed — valleys deepened, rivers ran whiter, and the mountains began asserting themselves with increasing authority. Then, all at once, the <em>Eiger, Mönch and Jungfrau</em> appeared in the train windows, their north faces filling the sky above everything else. From <em>Interlaken Ost</em>, a short bus ride up the hillside brought the group to their Airbnb in <em>Goldswil bei Interlaken</em> — a tiny hamlet perched above the valley with an uninterrupted view straight to those three famous summits.</p>
+<div class="pq">"What an absolutely breathtaking location they had chosen. From the terrace, the Eiger, Mönch and Jungfrau sat there in the afternoon sun as if posing for a painting — except no painting had ever quite done them justice."</div>
+<div class="pg g2">
+  <div class="pw tall" onclick="lb('1ESCRGoEPGng4V4sXg15mHZIG6mRjzJtT')"><img src="https://drive.google.com/thumbnail?id=1ESCRGoEPGng4V4sXg15mHZIG6mRjzJtT&sz=w800" alt="Alpine panorama" loading="lazy"><div class="pc">The view from Goldswil — panorama · 1 May</div></div>
+  <div class="pw" onclick="lb('1mgd65tomQGvKPGD7wFK8iJYgZWzahexE')"><img src="https://drive.google.com/thumbnail?id=1mgd65tomQGvKPGD7wFK8iJYgZWzahexE&sz=w500" alt="Arriving Interlaken" loading="lazy"><div class="pc">Arriving in Interlaken, 1 May</div></div>
+  <div class="pw" onclick="lb('1wHdMQtLFwtNltBHJXhCGVppET9O9F-JP')"><img src="https://drive.google.com/thumbnail?id=1wHdMQtLFwtNltBHJXhCGVppET9O9F-JP&sz=w500" alt="Goldswil 1 May" loading="lazy"><div class="pc">First evening at Goldswil</div></div>
+</div>
+</div>
+
+<div class="db">
+<span class="dl gold">Saturday 2 May — Andrew Hikes Harder Kulm; Lunch with Laura</span>
+<p class="cb">Andrew was up before the birds on the 2nd. While the rest of the group breakfasted at a civilised pace and then boarded the <em>Harderbahn cog railway</em> from Interlaken, Andrew had quietly laced up his boots and set off on foot — straight up the mountain. The <em>Harder Kulm</em> trail climbs nearly 900 metres through forest and open meadow, and the first photographs, time-stamped at 6:48am, show the valley still in deep shadow below while the high peaks above are already catching the season's first gold of sunrise. By the time he reached the <em>Harder Kulm summit restaurant</em> at 1,322 metres, the rest of the group had arrived by cog train — and there was an unexpected delight waiting: <em>Laura</em>, Heather's exchange student from many years ago, had made the journey out to join them. Lunch at the summit, with <em>Lakes Thun and Brienz</em> spread on either side far below and the full wall of the Eiger rising directly opposite, was one of those meals that nobody forgets.</p>
+<div class="pg g2">
+  <div class="pw tall" onclick="lb('1zF541jllPCKlNFJnUIxnASjxjhyszpPj')"><img src="https://drive.google.com/thumbnail?id=1zF541jllPCKlNFJnUIxnASjxjhyszpPj&sz=w700" alt="Harder Kulm hike 6:48am" loading="lazy"><div class="pc">Andrew's hike begins at 6:48am — 2 May</div></div>
+  <div class="pw" onclick="lb('1SAX7khlmI02ogHRqOBhnbnFH_o4O8Oww')"><img src="https://drive.google.com/thumbnail?id=1SAX7khlmI02ogHRqOBhnbnFH_o4O8Oww&sz=w500" alt="Hike 6:48am" loading="lazy"><div class="pc">First light on the trail</div></div>
+  <div class="pw" onclick="lb('1pFYS0RtDIE8y-yDYNj5FLifqDHhRj_ZJ')"><img src="https://drive.google.com/thumbnail?id=1pFYS0RtDIE8y-yDYNj5FLifqDHhRj_ZJ&sz=w500" alt="7:04am hike" loading="lazy"><div class="pc">7:04am — gaining altitude fast</div></div>
+  <div class="pw" onclick="lb('1l58uoshMQQBN0Nm_DqN4rGoH60Tw0YeC')"><img src="https://drive.google.com/thumbnail?id=1l58uoshMQQBN0Nm_DqN4rGoH60Tw0YeC&sz=w500" alt="7:50 hike" loading="lazy"><div class="pc">7:50am — the valley far below</div></div>
+</div>
+<div class="pg g1">
+  <div class="pw" style="aspect-ratio:21/9" onclick="lb('1ESCRGoEPGng4V4sXg15mHZIG6mRjzJtT')"><img src="https://drive.google.com/thumbnail?id=1ESCRGoEPGng4V4sXg15mHZIG6mRjzJtT&sz=w1200" alt="Harder Kulm panorama" loading="lazy"><div class="pc">Harder Kulm summit panorama — Lakes Thun &amp; Brienz with the Eiger opposite · 2 May</div></div>
+</div>
+<div class="pg g3">
+  <div class="pw" onclick="lb('1YDae3yGNNcIVzj6mCXGjU9dt5AS9wxkG')"><img src="https://drive.google.com/thumbnail?id=1YDae3yGNNcIVzj6mCXGjU9dt5AS9wxkG&sz=w500" alt="Summit 8:22am" loading="lazy"><div class="pc">At the summit — 8:22am</div></div>
+  <div class="pw" onclick="lb('11VuEy-FPGJyleRpo829YlaI8m3am3KGj')"><img src="https://drive.google.com/thumbnail?id=11VuEy-FPGJyleRpo829YlaI8m3am3KGj&sz=w500" alt="Harder Kulm summit" loading="lazy"><div class="pc">Harder Kulm summit restaurant</div></div>
+  <div class="pw" onclick="lb('1EvLv9PEC4yUtJXT5ltoKXAQZ4VKCG9lT')"><img src="https://drive.google.com/thumbnail?id=1EvLv9PEC4yUtJXT5ltoKXAQZ4VKCG9lT&sz=w500" alt="Lunch with Laura" loading="lazy"><div class="pc">Lunch with Laura at the top</div></div>
+  <div class="pw" onclick="lb('1LMHENK_lAivyat4MjjujONQ3qMjdGHYj')"><img src="https://drive.google.com/thumbnail?id=1LMHENK_lAivyat4MjjujONQ3qMjdGHYj&sz=w500" alt="Views from the top" loading="lazy"><div class="pc">Views from the summit</div></div>
+  <div class="pw" onclick="lb('1Uvdskwdu647R-MUO3Hx8-4cTPhSBCkJ7')"><img src="https://drive.google.com/thumbnail?id=1Uvdskwdu647R-MUO3Hx8-4cTPhSBCkJ7&sz=w500" alt="2 May" loading="lazy"><div class="pc">2 May afternoon</div></div>
+  <div class="pw" onclick="lb('11sra1VruQTfoSlRSVS5VMyMddLtnXm91')"><img src="https://drive.google.com/thumbnail?id=11sra1VruQTfoSlRSVS5VMyMddLtnXm91&sz=w500" alt="2 May afternoon" loading="lazy"><div class="pc">Back in the valley</div></div>
+</div>
+<div class="pg g2">
+  <div class="pw" onclick="lb('1-OrQ0ZbB-BU54-MLNAFJ4PGS45qsMbMU')"><img src="https://drive.google.com/thumbnail?id=1-OrQ0ZbB-BU54-MLNAFJ4PGS45qsMbMU&sz=w500" alt="Goldswil 2 May" loading="lazy"><div class="pc">Goldswil afternoon, 2 May</div></div>
+  <div class="pw" onclick="lb('1f8DdouG_JhgtwcYcDnr284F6U2JV_iQr')"><img src="https://drive.google.com/thumbnail?id=1f8DdouG_JhgtwcYcDnr284F6U2JV_iQr&sz=w500" alt="2 May" loading="lazy"><div class="pc">2 May</div></div>
+</div>
+<div class="pg g4">
+  <div class="pw" onclick="lb('1-AAQoTcTOTOdY8r4116rwev6zz9LUBNK')"><img src="https://drive.google.com/thumbnail?id=1-AAQoTcTOTOdY8r4116rwev6zz9LUBNK&sz=w400" alt="2 May" loading="lazy"><div class="pc">2 May</div></div>
+  <div class="pw" onclick="lb('11FBw75A3M02j-d05jv4nTT8AraSWfHzl')"><img src="https://drive.google.com/thumbnail?id=11FBw75A3M02j-d05jv4nTT8AraSWfHzl&sz=w400" alt="2 May" loading="lazy"><div class="pc">2 May</div></div>
+  <div class="pw" onclick="lb('1oTo3PLQ43yiYQvchJvOfT4lb_CVlS3xT')"><img src="https://drive.google.com/thumbnail?id=1oTo3PLQ43yiYQvchJvOfT4lb_CVlS3xT&sz=w400" alt="2 May" loading="lazy"><div class="pc">2 May</div></div>
+  <div class="pw" onclick="lb('10Fcr6WAe4w98Yz-9k1eoiEMDD_amynOF')"><img src="https://drive.google.com/thumbnail?id=10Fcr6WAe4w98Yz-9k1eoiEMDD_amynOF&sz=w400" alt="2 May" loading="lazy"><div class="pc">2 May</div></div>
+</div>
+</div>
+
+<div class="db">
+<span class="dl">Sunday 3 May — Lauterbrunnen &amp; Mürren</span>
+<p class="cb">The 3rd took the group into the <em>Valley of 72 Waterfalls</em>. A short train from Interlaken Ost brought them to <em>Lauterbrunnen</em>, where 300-metre cliffs rise vertically on both sides and <em>Staubbachfall</em> plunges off the rock face in a silver thread visible straight from the station. From there, a cable car up to <em>Grütschalp</em> and a narrow-gauge train across the cliff-edge delivered them to the car-free village of <em>Mürren</em> — one of the most dramatically situated settlements in the Alps. The walk through Mürren's narrow lanes offered the Big Three — <em>Eiger, Mönch and Jungfrau</em> — at almost exactly eye level, which is arguable a better perspective than from the top itself. The afternoon was spent on terrace benches with coffee and a view that makes most other views feel slightly inadequate.</p>
+<div class="pg g2">
+  <div class="pw tall" onclick="lb('1xCplcj8Xl0n_38mOjBB82ZnidvACKZaA')"><img src="https://drive.google.com/thumbnail?id=1xCplcj8Xl0n_38mOjBB82ZnidvACKZaA&sz=w700" alt="Lauterbrunnen valley" loading="lazy"><div class="pc">Lauterbrunnen valley — 3 May</div></div>
+  <div class="pw" onclick="lb('134R_ycdwmEQOJzL3xBtS2bxupvlmAqwq')"><img src="https://drive.google.com/thumbnail?id=134R_ycdwmEQOJzL3xBtS2bxupvlmAqwq&sz=w500" alt="Mürren 3 May" loading="lazy"><div class="pc">Mürren — car-free village</div></div>
+  <div class="pw" onclick="lb('1ix3gFYSqTLpZ-1khDVZTsF2RJkURs7d0')"><img src="https://drive.google.com/thumbnail?id=1ix3gFYSqTLpZ-1khDVZTsF2RJkURs7d0&sz=w500" alt="Valley 3 May" loading="lazy"><div class="pc">Valley views</div></div>
+  <div class="pw" onclick="lb('1Hdidl5T5wObHeUXC5JOxe6PTdAPU_Yyw')"><img src="https://drive.google.com/thumbnail?id=1Hdidl5T5wObHeUXC5JOxe6PTdAPU_Yyw&sz=w500" alt="Waterfalls 3 May" loading="lazy"><div class="pc">Valley of waterfalls</div></div>
+</div>
+<div class="pg g4">
+  <div class="pw" onclick="lb('1_TFVF3MOPUUtxnD_zjMDB7viY5PjAh6L')"><img src="https://drive.google.com/thumbnail?id=1_TFVF3MOPUUtxnD_zjMDB7viY5PjAh6L&sz=w400" alt="3 May morning" loading="lazy"><div class="pc">3 May morning</div></div>
+  <div class="pw" onclick="lb('1AaISI8sF1S7Bbmwt68_ke5tKrlhTtDbu')"><img src="https://drive.google.com/thumbnail?id=1AaISI8sF1S7Bbmwt68_ke5tKrlhTtDbu&sz=w400" alt="3 May" loading="lazy"><div class="pc">3 May</div></div>
+  <div class="pw" onclick="lb('1nucZDLvnEeZx9HXtMagIERan1TnMzz4Z')"><img src="https://drive.google.com/thumbnail?id=1nucZDLvnEeZx9HXtMagIERan1TnMzz4Z&sz=w400" alt="3 May Mürren" loading="lazy"><div class="pc">Mürren afternoon</div></div>
+  <div class="pw" onclick="lb('1Fijhk5HUVrwAifaUBtkNhNz0f84_zBNu')"><img src="https://drive.google.com/thumbnail?id=1Fijhk5HUVrwAifaUBtkNhNz0f84_zBNu&sz=w400" alt="3 May late" loading="lazy"><div class="pc">Late afternoon light</div></div>
+</div>
+</div>
+
+<div class="db">
+<span class="dl gold">Monday 4 May — Jungfraujoch: the Highest Railway in Europe</span>
+<p class="cb">The 4th of May was the big one. Up early, first train to <em>Grindelwald Terminal</em>, then straight aboard the <em>Eiger Express</em> — a massive three-cable gondola with floor-to-ceiling windows, whisking passengers up the entire face of the mountain in just 15 minutes. The view back across Grindelwald as the gondola climbed was jaw-dropping. A transfer at <em>Eigergletscher</em> onto the famous <em>Jungfrau Railway</em> — bored through the living rock of the Eiger and Mönch — brought the group to the summit station at <em>Jungfraujoch, 3,454 metres</em>. Above the clouds, in temperatures well below zero, they stood on the <em>Sphinx Observatory</em> terrace and looked out over the <em>Aletsch Glacier</em>, the longest in the Alps. In the <em>Ice Palace</em> below, rooms carved from ancient glacial ice glittered blue-white under dim lighting. It is, without question, one of the most extraordinary places on Earth that a train can take you.</p>
+<div class="pq">"At 3,454 metres the snow was blinding white and the air was thin. The Sphinx Observatory floated above the clouds. Below in the glacier, carved corridors of ancient ice went on and on."</div>
+<div class="pg g2">
+  <div class="pw tall" onclick="lb('1OAzfsIOjGmS5K9wnJJ9WgV0gB_2A0wrd')"><img src="https://drive.google.com/thumbnail?id=1OAzfsIOjGmS5K9wnJJ9WgV0gB_2A0wrd&sz=w700" alt="Jungfraujoch 4 May" loading="lazy"><div class="pc">Jungfraujoch — Top of Europe · 4 May</div></div>
+  <div class="pw" onclick="lb('1lhlOwEBRwJxpVwxO_BPDgLQlK8s4CzIq')"><img src="https://drive.google.com/thumbnail?id=1lhlOwEBRwJxpVwxO_BPDgLQlK8s4CzIq&sz=w500" alt="Early morning 4 May" loading="lazy"><div class="pc">Early morning Goldswil, 4 May</div></div>
+  <div class="pw" onclick="lb('1TurqkuKlPCk505jcHdlGRlsXvrqEhjva')"><img src="https://drive.google.com/thumbnail?id=1TurqkuKlPCk505jcHdlGRlsXvrqEhjva&sz=w500" alt="Grindelwald 4 May" loading="lazy"><div class="pc">Grindelwald terminal</div></div>
+  <div class="pw" onclick="lb('1_PW82kyBxZnc1p1sPZin9r_AwiOTdUfZ')"><img src="https://drive.google.com/thumbnail?id=1_PW82kyBxZnc1p1sPZin9r_AwiOTdUfZ&sz=w500" alt="Jungfraujoch" loading="lazy"><div class="pc">Jungfraujoch · 3,454m</div></div>
+</div>
+<div class="pg g3">
+  <div class="pw" onclick="lb('11P2KUBFxA_zWsum4jSyY59pvFeuggURs')"><img src="https://drive.google.com/thumbnail?id=11P2KUBFxA_zWsum4jSyY59pvFeuggURs&sz=w500" alt="4 May 10:43" loading="lazy"><div class="pc">10:43am</div></div>
+  <div class="pw" onclick="lb('19ki3lDBQhBRY_xSFqxUxWV1PjKvsXh5b')"><img src="https://drive.google.com/thumbnail?id=19ki3lDBQhBRY_xSFqxUxWV1PjKvsXh5b&sz=w500" alt="Sphinx Observatory" loading="lazy"><div class="pc">The Sphinx Observatory</div></div>
+  <div class="pw" onclick="lb('1tIw-qYmw8VRaS4irWPuoAt_mHkPX_1PV')"><img src="https://drive.google.com/thumbnail?id=1tIw-qYmw8VRaS4irWPuoAt_mHkPX_1PV&sz=w500" alt="4 May 12:03" loading="lazy"><div class="pc">Aletsch Glacier below</div></div>
+</div>
+<div class="pg g3">
+  <div class="pw xwide" onclick="lb('1QNVyJOYY08JDErN_H-m3Sd5XZhVEXCHj')"><img src="https://drive.google.com/thumbnail?id=1QNVyJOYY08JDErN_H-m3Sd5XZhVEXCHj&sz=w1200" alt="Jungfraujoch wide" loading="lazy"><div class="pc">Jungfraujoch · 3,454m · 4 May 2026</div></div>
+</div>
+</div>
+
+<div class="db">
+<span class="dl gold">Tuesday 5 May — Andrew's 18km Hike; Lake Brienz by Boat</span>
+<p class="cb">Andrew was at it again. The photographs from the morning of 5 May are time-stamped at <em>5:06am</em>, showing him already on the trail from <em>Iselwald</em> on the southern shore of <em>Lake Brienz</em>, in near-darkness. What followed was an 18-kilometre hike that took him around and above the lake — through dense forest, along cliff-edge paths, and past the thundering <em>Giessbach Falls</em> — before he descended into the lakeside town of <em>Brienz</em> around midday. There, he met the rest of the group, who had taken the more sensible option of arriving by boat from Interlaken. They sat together at a waterfront restaurant for a long, well-earned lunch. The boat ride back down the turquoise lake to Interlaken, with the Brienzer Rothorn reflected in the water, completed a perfect day.</p>
+<div class="pg g2">
+  <div class="pw tall" onclick="lb('1GvBwKfN5w6LmnV1ulJeYnqA5-nAIS6iY')"><img src="https://drive.google.com/thumbnail?id=1GvBwKfN5w6LmnV1ulJeYnqA5-nAIS6iY&sz=w700" alt="Hike 5:06am 5 May" loading="lazy"><div class="pc">5:06am — Andrew sets off from Iselwald, 5 May</div></div>
+  <div class="pw" onclick="lb('1YfGWhNe2zO3K2r6Iun9uOUmtsL9msuRz')"><img src="https://drive.google.com/thumbnail?id=1YfGWhNe2zO3K2r6Iun9uOUmtsL9msuRz&sz=w500" alt="Hike 5:28am" loading="lazy"><div class="pc">5:28am — first light over Lake Brienz</div></div>
+  <div class="pw" onclick="lb('1sb5kugroyr9EeZgWpCBg2GkT5CfhE-Or')"><img src="https://drive.google.com/thumbnail?id=1sb5kugroyr9EeZgWpCBg2GkT5CfhE-Or&sz=w500" alt="Hike 6:54am" loading="lazy"><div class="pc">6:54am — above the lake, 18km to go</div></div>
+  <div class="pw" onclick="lb('1cTl1uJ9oUEJ0Xe1apWzGAajbFpfpxZuL')"><img src="https://drive.google.com/thumbnail?id=1cTl1uJ9oUEJ0Xe1apWzGAajbFpfpxZuL&sz=w500" alt="Lake Brienz boat 5 May" loading="lazy"><div class="pc">Lake Brienz by boat, 5 May</div></div>
+</div>
+<div class="pg g3">
+  <div class="pw" onclick="lb('1vtPQtqBTzU98jBEpGYtKW_kvYSoe167q')"><img src="https://drive.google.com/thumbnail?id=1vtPQtqBTzU98jBEpGYtKW_kvYSoe167q&sz=w500" alt="Brienz 5 May" loading="lazy"><div class="pc">Brienz, 12:50pm</div></div>
+  <div class="pw" onclick="lb('14TVFAbS2OblVRe-cANHmGhKNY1wWBCQK')"><img src="https://drive.google.com/thumbnail?id=14TVFAbS2OblVRe-cANHmGhKNY1wWBCQK&sz=w500" alt="Brienz lunch" loading="lazy"><div class="pc">Lunch at Brienz waterfront</div></div>
+  <div class="pw" onclick="lb('1tIx3ApZhx4mfYSDN0SLj_GmSG_UbXJ-L')"><img src="https://drive.google.com/thumbnail?id=1tIx3ApZhx4mfYSDN0SLj_GmSG_UbXJ-L&sz=w500" alt="Lake Brienz afternoon" loading="lazy"><div class="pc">Afternoon on the lake</div></div>
+</div>
+</div>
+
+<div class="chips">
+  <span class="chip">Goldswil bei Interlaken Airbnb · 5 nights</span>
+  <span class="chip">Harder Kulm — Andrew hiked, others cog train</span>
+  <span class="chip">Lunch with Laura at the summit</span>
+  <span class="chip">Lauterbrunnen &amp; Mürren</span>
+  <span class="chip">Jungfraujoch 3,454m — highest railway in Europe</span>
+  <span class="chip">18km Iselwald → Brienz hike</span>
+  <span class="chip">Lake Brienz boat trip</span>
+</div>
+</article>
+
+<div class="divider">· · ·</div>
+
+<!-- ══════════════ CH5 ══════════════ -->
+<article class="chapter" id="ch5" data-chapter="5">
+<div class="ch-eye">Chapter V</div>
+<h2 class="ch-title">All Roads Lead to the Airport</h2>
+<div class="ch-dates">6 – 7 May 2026</div>
+
+<p class="cb">On the 6th of May, the group boarded the train back north to Zürich for one final night together — a flat in <em>Seebach</em> in the northern suburbs. It was a quieter evening, laced with the familiar mixture of deep holiday satisfaction and that particular wistfulness that descends when you know it's nearly over. Zürich, as if sensing the mood, was at its most golden.</p>
+<p class="cb" style="margin-top:.9rem">On the morning of the 7th, all five went to <em>Zürich Airport</em> together. At the departures hall, the group split for the last time: <em>John and Sue</em> settled in for the long wait for their <em>EasyJet EZY2194</em> back to Manchester, whilst <em>Andrew, Heather and Bella</em> checked in together for <em>Singapore Airlines SQ345</em>. The three Australians took off first, swapping knowing looks as the city fell away beneath them. Eighteen days. Zürich twice. Barcelona. A cave system beside a lake, the medieval streets of Stein am Rhein, the thundering Rhine Falls, the Chapel Bridge, a mountaintop at 3,454 metres, two dawn hikes, lake boats, cog railways, and more trains than any of them had ever taken before. They'd done every last bit of it — together.</p>
+<div class="pg g3">
+  <div class="pw" onclick="lb('1cTl1uJ9oUEJ0Xe1apWzGAajbFpfpxZuL')"><img src="https://drive.google.com/thumbnail?id=1cTl1uJ9oUEJ0Xe1apWzGAajbFpfpxZuL&sz=w500" alt="Final lake" loading="lazy"><div class="pc">Final afternoon on the lake</div></div>
+  <div class="pw" onclick="lb('1vtPQtqBTzU98jBEpGYtKW_kvYSoe167q')"><img src="https://drive.google.com/thumbnail?id=1vtPQtqBTzU98jBEpGYtKW_kvYSoe167q&sz=w500" alt="5 May" loading="lazy"><div class="pc">5 May</div></div>
+  <div class="pw" onclick="lb('1tIx3ApZhx4mfYSDN0SLj_GmSG_UbXJ-L')"><img src="https://drive.google.com/thumbnail?id=1tIx3ApZhx4mfYSDN0SLj_GmSG_UbXJ-L&sz=w500" alt="Final views" loading="lazy"><div class="pc">Last alpine afternoon</div></div>
+  <div class="pw" onclick="lb('1sb5kugroyr9EeZgWpCBg2GkT5CfhE-Or')"><img src="https://drive.google.com/thumbnail?id=1sb5kugroyr9EeZgWpCBg2GkT5CfhE-Or&sz=w500" alt="Last hike morning" loading="lazy"><div class="pc">Last morning in the Alps</div></div>
+  <div class="pw" onclick="lb('1GvBwKfN5w6LmnV1ulJeYnqA5-nAIS6iY')"><img src="https://drive.google.com/thumbnail?id=1GvBwKfN5w6LmnV1ulJeYnqA5-nAIS6iY&sz=w500" alt="Farewell Alps" loading="lazy"><div class="pc">Farewell Alps</div></div>
+  <div class="pw" onclick="lb('1zNneY5mjyhQV3HPKqud_D-IbQJ4k4MHK')"><img src="https://drive.google.com/thumbnail?id=1zNneY5mjyhQV3HPKqud_D-IbQJ4k4MHK&sz=w500" alt="Farewell" loading="lazy"><div class="pc">Until next time, Switzerland</div></div>
+</div>
+<div class="chips">
+  <span class="chip">Seebach, Zürich — final night</span>
+  <span class="chip">John &amp; Sue → EZY2194 → Manchester</span>
+  <span class="chip">Andrew, Heather &amp; Bella → SQ345 → Brisbane</span>
+  <span class="chip">18 days · 4 countries · 1 summit · countless memories</span>
+</div>
+</article>
+
+</main>
+
+<!-- ══ MAP ══ -->
+<aside class="map-panel">
+  <div id="map"></div>
+  <div class="map-label" id="mapLabel">Scroll through the journal to follow the route</div>
+  <div class="map-legend">
+    <div class="leg-i"><div class="leg-d" style="background:#c49a3c"></div>Active/cog</div>
+    <div class="leg-i"><div class="leg-d" style="background:#2d4a3e"></div>Visited</div>
+    <div class="leg-i"><div class="leg-l" style="background:#4a7fa5"></div>Flight</div>
+    <div class="leg-i"><div class="leg-l" style="background:#2d4a3e"></div>Train</div>
+    <div class="leg-i"><div class="leg-l" style="background:#7a5fa0"></div>Cable car</div>
+    <div class="leg-i"><div class="leg-l" style="background:#4a9fa5"></div>Boat</div>
+    <div class="leg-i"><div class="leg-l" style="background:#c49a3c;border-top:2px dotted #c49a3c;height:0"></div>Hike</div>
+  </div>
+</aside>
+</div>
+
+<footer class="site-footer">
+  <p>Brisbane → Singapore → Zürich → Barcelona → Zürich → Interlaken → Brisbane</p>
+  <small>19 April – 7 May 2026 · Andrew, Heather &amp; Bella · with John &amp; Sue from Manchester · Jungfraujoch 3,454m</small>
+</footer>
+
+<div class="lb" id="lbOv" onclick="closeLb()">
+  <div class="lb-x" onclick="closeLb()">×</div>
+  <img id="lbImg" src="" alt="">
+</div>
+
+<script>
+// ── LIGHTBOX
+function lb(id){
+  var src=id.startsWith('http')?id:'https://drive.google.com/thumbnail?id='+id+'&sz=w1600';
+  document.getElementById('lbImg').src=src;
+  document.getElementById('lbOv').classList.add('open');
+}
+function closeLb(){document.getElementById('lbOv').classList.remove('open');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb();});
+
+// ── MAP
+var map=L.map('map',{zoomControl:true,attributionControl:true,scrollWheelZoom:false});
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+  attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:17
+}).addTo(map);
+map.setView([47.4,8.5],5);
+
+var P={
+  brisbane:[-27.4698,153.0251],singapore:[1.3521,103.8198],
+  zurich:[47.3769,8.5417],steinAmRhein:[47.6569,8.8592],
+  rhineFalls:[47.6771,8.6159],stBeatus:[46.6842,7.7281],
+  barcelona:[41.3851,2.1734],lucerne:[47.0502,8.3093],
+  rapperswil:[47.2264,8.8183],manchester:[53.4808,-2.2426],
+  interlaken:[46.6863,7.8632],interlakenOst:[46.6907,7.8686],goldswil:[46.7050,7.9000],
+  harderKulm:[46.6960,7.8543],harderBahn:[46.6882,7.8575],
+  lauterbrunnen:[46.5931,7.9080],grutschalp:[46.5800,7.8716],murren:[46.5592,7.8928],
+  grindelwald:[46.6244,8.0413],eigergletscher:[46.5742,7.9714],jungfraujoch:[46.5475,7.9854],
+  iselwald:[46.7144,7.9778],brienz:[46.7581,8.0329],
+  brienzLake:[46.7300,7.9800],seebach:[47.4116,8.5351],
+  brienzsee:[46.7250,7.9500]
+};
+
+function mk(ll,col,sz,tip){
+  sz=sz||10;
+  var m=L.marker(ll,{icon:L.divIcon({className:'',
+    html:'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+col+';border:2px solid white;box-shadow:0 1px 5px rgba(0,0,0,.35)"></div>',
+    iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]})});
+  if(tip)m.bindTooltip(tip,{direction:'top',offset:[0,-sz/2+2]});
+  return m;
+}
+function arc(a,b,col,da){
+  var pts=[],n=50;
+  for(var i=0;i<=n;i++){
+    var t=i/n,lat=a[0]+(b[0]-a[0])*t,lng=a[1]+(b[1]-a[1])*t;
+    var off=Math.sin(Math.PI*t)*5,dl=b[0]-a[0],dg=b[1]-a[1],len=Math.sqrt(dl*dl+dg*dg);
+    pts.push([lat-dg/len*off,lng+dl/len*off]);
+  }
+  return L.polyline(pts,{color:col||'#4a7fa5',weight:1.5,opacity:.65,dashArray:da||'6 4'});
+}
+function ln(pts,col,w,da){
+  return L.polyline(pts,{color:col||'#2d4a3e',weight:w||2,opacity:.75,dashArray:da});
+}
+
+var layers=[],curCh=0;
+function clr(){layers.forEach(function(l){try{map.removeLayer(l);}catch(e){}});layers=[];}
+function add(l){l.addTo(map);layers.push(l);}
+
+var chs=[
+  {// 1
+    lbl:'Chapter I · Brisbane → Zürich · 19–23 April',
+    view:{c:P.zurich,z:9},
+    build:function(){
+      add(arc(P.brisbane,P.singapore,'#4a7fa5'));add(arc(P.singapore,P.zurich,'#4a7fa5'));
+      add(mk(P.brisbane,'#8ba89a',9,'Brisbane — departure'));
+      add(mk(P.singapore,'#8ba89a',8,'Singapore connection'));
+      add(mk(P.zurich,'#c49a3c',14,'Zürich — Easy Hotel, Heinrichstrasse'));
+      add(ln([P.zurich,P.steinAmRhein],'#2d4a3e',2));
+      add(ln([P.steinAmRhein,P.rhineFalls],'#2d4a3e',2));
+      add(mk(P.steinAmRhein,'#2d4a3e',10,'Stein am Rhein — 22 Apr'));
+      add(mk(P.rhineFalls,'#2d4a3e',10,'Rhine Falls — 22 Apr'));
+      add(ln([P.zurich,P.stBeatus],'#2d4a3e',2));
+      add(mk(P.stBeatus,'#2d4a3e',10,'St. Beatus-Höhlen — 23 Apr'));
+    },
+    flyFrom:{c:[26,68],z:3}
+  },
+  {// 2
+    lbl:'Chapter II · Barcelona · 23–27 April',
+    view:{c:[43.5,4],z:6},
+    build:function(){
+      add(arc(P.brisbane,P.singapore,'#4a7fa5'));add(arc(P.singapore,P.zurich,'#4a7fa5'));
+      add(arc(P.zurich,P.barcelona,'#4a7fa5'));
+      add(mk(P.brisbane,'#8ba89a',8));add(mk(P.singapore,'#8ba89a',8));
+      add(mk(P.zurich,'#8ba89a',10,'Zürich'));
+      add(mk(P.barcelona,'#c75b39',14,'Barcelona — Hostal Drassanes'));
+    }
+  },
+  {// 3
+    lbl:'Chapter III · Zürich with Family · 27 Apr – 1 May',
+    view:{c:[47.4,8.4],z:9},
+    build:function(){
+      add(arc(P.brisbane,P.singapore,'#4a7fa5'));add(arc(P.singapore,P.zurich,'#4a7fa5'));
+      add(arc(P.zurich,P.barcelona,'#4a7fa5'));add(arc(P.barcelona,P.zurich,'#4a7fa5'));
+      add(arc(P.manchester,P.zurich,'#8ba89a','8 4'));
+      add(mk(P.brisbane,'#8ba89a',7));add(mk(P.singapore,'#8ba89a',7));
+      add(mk(P.barcelona,'#8ba89a',9,'Barcelona'));
+      add(mk(P.manchester,'#8ba89a',9,'Manchester — John & Sue'));
+      add(mk(P.zurich,'#c49a3c',14,'Zürich — Viadukt Apartments'));
+      add(ln([P.zurich,P.lucerne],'#2d4a3e',2.5));
+      add(mk(P.lucerne,'#2d4a3e',11,'Lucerne — Lion Monument · 28 Apr'));
+      add(ln([P.zurich,P.rhineFalls],'#2d4a3e',2));
+      add(mk(P.rhineFalls,'#2d4a3e',10,'Rhine Falls — 29 Apr'));
+      add(ln([P.zurich,P.rapperswil],'#2d4a3e',2));
+      add(mk(P.rapperswil,'#2d4a3e',10,'Rapperswil — Lake cruise · 30 Apr'));
+    }
+  },
+  {// 4 — zoomed into Interlaken with all trips, transport-coded
+    lbl:'Chapter IV · Interlaken — Between the Lakes · 1–5 May',
+    view:{c:[46.63,7.94],z:11},
+    bounds:[[46.52,7.82],[46.78,8.12]],
+    build:function(){
+      // Faint train line from Zürich to show arrival
+      add(L.polyline([P.zurich,P.interlaken],{color:'#8ba89a',weight:1.5,opacity:.5,dashArray:'6 4'}));
+      add(mk(P.zurich,'#8ba89a',7,'Zürich'));
+
+      // Base markers
+      add(mk(P.goldswil,'#c49a3c',14,'Goldswil — Airbnb base'));
+      add(mk(P.interlaken,'#2d4a3e',11,'Interlaken'));
+      add(mk(P.interlakenOst,'#2d4a3e',9,'Interlaken Ost'));
+
+      // ── HARDER KULM (2 May) ──────────────────────────────
+      // Cog railway: Harderbahn station → Harder Kulm
+      add(L.polyline([P.harderBahn,P.harderKulm],{color:'#c49a3c',weight:3,opacity:.9}));
+      add(mk(P.harderBahn,'#c49a3c',8,'Harderbahn — cog railway station'));
+      add(mk(P.harderKulm,'#c49a3c',12,'Harder Kulm 1,322m · cog railway · 2 May'));
+
+      // ── LAUTERBRUNNEN & MÜRREN (3 May) ───────────────────
+      // Train: Interlaken Ost → Lauterbrunnen
+      add(L.polyline([P.interlakenOst,P.lauterbrunnen],{color:'#2d4a3e',weight:2.5,opacity:.85}));
+      add(mk(P.lauterbrunnen,'#2d4a3e',11,'Lauterbrunnen · train · 3 May'));
+      // Cable car: Lauterbrunnen → Grütschalp
+      add(L.polyline([P.lauterbrunnen,P.grutschalp],{color:'#7a5fa0',weight:2,opacity:.85,dashArray:'4 3'}));
+      add(mk(P.grutschalp,'#7a5fa0',8,'Grütschalp · cable car'));
+      // Narrow-gauge train: Grütschalp → Mürren
+      add(L.polyline([P.grutschalp,P.murren],{color:'#7a5fa0',weight:2.5,opacity:.85}));
+      add(mk(P.murren,'#7a5fa0',11,'Mürren · train · 3 May'));
+
+      // ── JUNGFRAUJOCH (4 May) ─────────────────────────────
+      // Train: Interlaken Ost → Grindelwald
+      add(L.polyline([P.interlakenOst,P.grindelwald],{color:'#2d4a3e',weight:2.5,opacity:.85}));
+      add(mk(P.grindelwald,'#2d4a3e',10,'Grindelwald · train · 4 May'));
+      // Eiger Express cable car: Grindelwald → Eigergletscher
+      add(L.polyline([P.grindelwald,P.eigergletscher],{color:'#4a7fa5',weight:2.5,opacity:.85,dashArray:'5 3'}));
+      add(mk(P.eigergletscher,'#4a7fa5',8,'Eigergletscher · Eiger Express cable car'));
+      // Jungfrau cog railway: Eigergletscher → Jungfraujoch
+      add(L.polyline([P.eigergletscher,P.jungfraujoch],{color:'#c49a3c',weight:3,opacity:.9}));
+      add(mk(P.jungfraujoch,'#c49a3c',14,'Jungfraujoch 3,454m · cog railway · 4 May'));
+
+      // ── LAKE BRIENZ / BRIENZ (5 May) ─────────────────────
+      // Boat: Interlaken Ost → along lake → Brienz
+      add(L.polyline([P.interlakenOst,P.brienzsee,P.brienz],{color:'#4a9fa5',weight:2.5,opacity:.85,dashArray:'6 3'}));
+      add(mk(P.brienz,'#4a9fa5',11,'Brienz · boat · 5 May'));
+      // Andrew's hike: Iselwald → Brienz
+      add(L.polyline([P.iselwald,P.brienzLake,P.brienz],{color:'#c49a3c',weight:2,opacity:.8,dashArray:'2 4'}));
+      add(mk(P.iselwald,'#c49a3c',9,'Iselwald · hike start 5:06am · 5 May'));
+    }
+  },
+  {// 5
+    lbl:'Chapter V · Farewell · 6–7 May',
+    view:{c:[22,50],z:3},
+    build:function(){
+      add(arc(P.brisbane,P.singapore,'#4a7fa5'));add(arc(P.singapore,P.zurich,'#4a7fa5'));
+      add(arc(P.zurich,P.barcelona,'#4a7fa5'));add(arc(P.barcelona,P.zurich,'#4a7fa5'));
+      add(arc(P.manchester,P.zurich,'#8ba89a','8 4'));
+      add(ln([P.zurich,P.interlaken],'#8ba89a',1.5));
+      add(ln([P.interlaken,P.seebach],'#8ba89a',1.5));
+      add(arc(P.seebach,P.manchester,'#8ba89a','8 4'));
+      add(arc(P.seebach,P.singapore,'#4a7fa5'));
+      add(arc(P.singapore,P.brisbane,'#4a7fa5'));
+      [P.zurich,P.barcelona,P.interlaken,P.seebach].forEach(function(l){add(mk(l,'#2d4a3e',9));});
+      add(mk(P.manchester,'#8ba89a',9,'Manchester — John & Sue home'));
+      add(mk(P.singapore,'#8ba89a',8,'Singapore'));
+      add(mk(P.brisbane,'#c49a3c',13,'Brisbane — home!'));
+    }
+  }
+];
+
+var curCh=0;
+function loadCh(n){
+  if(n===curCh)return; curCh=n;
+  clr();
+  var d=chs[n-1]; if(!d)return;
+  d.build();
+  document.getElementById('mapLabel').innerHTML=d.lbl;
+  if(d.bounds){
+    var b=L.latLngBounds(d.bounds[0],d.bounds[1]);
+    map.flyToBounds(b,{animate:true,duration:1.4,padding:[40,40]});
+  } else {
+    var v=d.view; map.flyTo(v.c,v.z,{animate:true,duration:1.3});
+  }
+}
+
+(function(){
+  var io=new IntersectionObserver(function(ents){
+    ents.forEach(function(e){
+      if(e.isIntersecting){
+        var n=parseInt(e.target.getAttribute('data-chapter'));
+        if(n)loadCh(n);
+      }
+    });
+  },{threshold:0,rootMargin:'-30% 0px -30% 0px'});
+  document.querySelectorAll('.chapter[data-chapter]').forEach(function(el){io.observe(el);});
+
+  // Scroll fallback for very tall chapters
+  var chapters=Array.from(document.querySelectorAll('.chapter[data-chapter]'));
+  var mid=window.innerHeight*0.4;
+  window.addEventListener('scroll',function(){
+    for(var i=0;i<chapters.length;i++){
+      var r=chapters[i].getBoundingClientRect();
+      if(r.top<=mid && r.bottom>=mid){
+        var n=parseInt(chapters[i].getAttribute('data-chapter'));
+        if(n)loadCh(n);
+        break;
+      }
+    }
+  },{passive:true});
+})();
+
+// ── AUDIO — alpine nature soundscape
+var AC=null,playing=false,nodes=[],tStart=0,tOff=0,pTmr=null,tkIdx=0;
+var TRACKS=[
+  {n:'Morning Meadow',s:'Wind through grass · distant cow bells · birdsong'},
+  {n:'Waterfall Valley',s:'Lauterbrunnen — rushing falls · mist · deep gorge'},
+  {n:'High Alpine Wind',s:'Jungfraujoch — glacial gusts · thin air · silence'},
+  {n:'Lake at Dawn',s:'Brienz — still water · soft bells · waking birds'},
+  {n:'Alpine Evening',s:'Goldswil at dusk · wind fading · cowbells settling'}
+];
+var DUR=38;
+
+function ac(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();return AC;}
+
+// ── BUILDING BLOCKS ────────────────────────────────────────────
+
+// White/pink noise buffer for wind and water
+function makeNoise(ctx, dur, type){
+  var sr=ctx.sampleRate, len=Math.min(sr*dur, sr*4);
+  var buf=ctx.createBuffer(1,len,sr), data=buf.getChannelData(0);
+  var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0;
+  for(var i=0;i<len;i++){
+    var w=(Math.random()*2-1);
+    if(type==='pink'){
+      b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759;
+      b2=0.96900*b2+w*0.1538520; b3=0.86650*b3+w*0.3104856;
+      b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980;
+      data[i]=(b0+b1+b2+b3+b4+b5+w*0.5362)*0.11;
+    } else {
+      data[i]=w; // white
+    }
+  }
+  return buf;
+}
+
+// Stream noise through a bandpass filter — makes wind/water texture
+function addNoise(startT, dur, vol, freqLo, freqHi, type){
+  var ctx=ac();
+  var src=ctx.createBufferSource();
+  src.buffer=makeNoise(ctx, Math.min(dur,4), type||'pink');
+  src.loop=true;
+  var filt=ctx.createBiquadFilter();
+  filt.type='bandpass';
+  filt.frequency.value=(freqLo+freqHi)/2;
+  filt.Q.value=0.8;
+  var gain=ctx.createGain();
+  gain.gain.setValueAtTime(0,startT);
+  gain.gain.linearRampToValueAtTime(vol,startT+1.5);
+  gain.gain.setValueAtTime(vol,startT+dur-1.5);
+  gain.gain.linearRampToValueAtTime(0,startT+dur);
+  src.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
+  src.start(startT); src.stop(startT+dur);
+  nodes.push(src);
+}
+
+// Wind — layered pink noise sweeping slowly
+function addWind(startT, dur, vol, baseFreq){
+  baseFreq=baseFreq||200;
+  addNoise(startT, dur, vol*0.6, baseFreq*0.5, baseFreq*1.5, 'pink');
+  addNoise(startT+0.3, dur*0.9, vol*0.4, baseFreq*1.5, baseFreq*4, 'pink');
+  // slow LFO wobble on a second layer
+  var ctx=ac();
+  var src=ctx.createBufferSource();
+  src.buffer=makeNoise(ctx,4,'pink'); src.loop=true;
+  var filt=ctx.createBiquadFilter(); filt.type='lowpass';
+  filt.frequency.setValueAtTime(baseFreq*0.8,startT);
+  filt.frequency.linearRampToValueAtTime(baseFreq*2.5,startT+dur*0.5);
+  filt.frequency.linearRampToValueAtTime(baseFreq*0.6,startT+dur);
+  var gain=ctx.createGain();
+  gain.gain.setValueAtTime(0,startT);
+  gain.gain.linearRampToValueAtTime(vol*0.35,startT+2);
+  gain.gain.setValueAtTime(vol*0.35,startT+dur-2);
+  gain.gain.linearRampToValueAtTime(0,startT+dur);
+  src.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
+  src.start(startT); src.stop(startT+dur);
+  nodes.push(src);
+}
+
+// Waterfall — wide band white noise, low-mid rumble + high spray
+function addWaterfall(startT, dur, vol){
+  addNoise(startT, dur, vol*0.7, 80, 600, 'white');    // deep rumble
+  addNoise(startT, dur, vol*0.5, 600, 3000, 'white');   // mid rush
+  addNoise(startT+0.5, dur*0.9, vol*0.3, 3000, 8000, 'white'); // spray
+}
+
+// Cow bell — metallic clang using two detuned oscillators + sharp decay
+function cowbell(startT, vol){
+  vol=vol||0.18;
+  var ctx=ac();
+  [[220,0],[277,30],[349,12],[440,-20]].forEach(function(fd){
+    var o=ctx.createOscillator(), g=ctx.createGain();
+    o.type='square'; o.frequency.value=fd[0]; o.detune.value=fd[1];
+    g.gain.setValueAtTime(vol,startT);
+    g.gain.exponentialRampToValueAtTime(0.0001,startT+2.2);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(startT); o.stop(startT+2.5);
+    nodes.push(o);
+  });
+}
+
+// Bird call — quick ascending sine chirp
+function bird(startT, vol){
+  vol=vol||0.07;
+  var ctx=ac();
+  var freqs=[[880,1200],[1100,800],[900,1300]];
+  var pair=freqs[Math.floor(Math.random()*freqs.length)];
+  var o=ctx.createOscillator(), g=ctx.createGain();
+  o.type='sine';
+  o.frequency.setValueAtTime(pair[0],startT);
+  o.frequency.linearRampToValueAtTime(pair[1],startT+0.12);
+  o.frequency.linearRampToValueAtTime(pair[0]*0.95,startT+0.22);
+  g.gain.setValueAtTime(0,startT);
+  g.gain.linearRampToValueAtTime(vol,startT+0.04);
+  g.gain.linearRampToValueAtTime(0,startT+0.24);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(startT); o.stop(startT+0.3);
+  nodes.push(o);
+}
+
+// Distant bell tone — pure sine, very long decay
+function distantBell(startT, freq, vol){
+  var ctx=ac();
+  var o=ctx.createOscillator(), g=ctx.createGain();
+  o.type='sine'; o.frequency.value=freq||523;
+  g.gain.setValueAtTime(vol||0.06,startT);
+  g.gain.exponentialRampToValueAtTime(0.0001,startT+4.5);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(startT); o.stop(startT+5);
+  nodes.push(o);
+}
+
+// ── MOVEMENTS ──────────────────────────────────────────────────
+
+function morningMeadow(b){
+  // Light wind throughout
+  addWind(b, DUR, 0.25, 300);
+
+
+  // Distant bell tones
+  [[6,523],[12,440],[20,392],[29,494]].forEach(function(p){
+    distantBell(b+p[0], p[1], 0.04);
+  });
+}
+
+function waterfallValley(b){
+  // Build up waterfall — starts distant, swells
+  addWaterfall(b, DUR, 0.0);
+  addNoise(b, DUR*0.6, 0.15, 100, 800, 'white');
+  addNoise(b+4, DUR-4, 0.28, 200, 2500, 'white');
+  addNoise(b+8, DUR-8, 0.20, 800, 5000, 'white');
+  // Wind in the gorge — lower frequency
+  addWind(b, DUR, 0.18, 150);
+
+
+}
+
+function highAlpineWind(b){
+  // Strong gusting wind — higher frequency, more intense
+  addWind(b, DUR, 0.45, 600);
+  addWind(b+2, DUR-2, 0.30, 1200);
+  // Occasional stronger gust
+  [4,10,18,25,32].forEach(function(t){
+    addNoise(b+t, 2.5, 0.35, 400, 2000, 'pink');
+  });
+
+  // High altitude — no birds, just silence and wind
+  // One lone distant bell
+  distantBell(b+14, 349, 0.05);
+  distantBell(b+22, 294, 0.04);
+}
+
+function lakeAtDawn(b){
+  // Very gentle wind — almost still
+  addWind(b, DUR, 0.12, 250);
+  // Soft water lapping — very low frequency noise
+  addNoise(b, DUR, 0.10, 60, 200, 'pink');
+  addNoise(b+1, DUR-1, 0.08, 150, 400, 'pink');
+
+
+  // Distant bell tones like a church
+  [[3,523],[8,494],[14,440],[20,523],[26,392],[33,494]].forEach(function(p){
+    distantBell(b+p[0], p[1], 0.05);
+  });
+}
+
+function alpineEvening(b){
+  // Wind dying down — starts moderate, fades
+  addWind(b, DUR*0.6, 0.28, 280);
+  addWind(b+DUR*0.4, DUR*0.6, 0.12, 200);
+
+
+  // Distant bell tones — like an alpine chapel at vespers
+  [[5,392],[11,349],[18,330],[24,392],[31,440]].forEach(function(p){
+    distantBell(b+p[0], p[1], 0.055);
+  });
+  // Soft water somewhere far below
+  addNoise(b+10, DUR-10, 0.07, 100, 400, 'pink');
+}
+
+var tFns=[morningMeadow,waterfallValley,highAlpineWind,lakeAtDawn,alpineEvening];
+
+function playTk(base){tFns[tkIdx%tFns.length](base);}
+function setUI(){var t=TRACKS[tkIdx%TRACKS.length];document.getElementById('tkName').innerHTML=t.n;document.getElementById('tkSub').innerHTML=t.s;}
+
+function togglePlay(){
+  var c=ac();
+  if(playing){
+    nodes.forEach(function(n){try{n.stop();}catch(e){}});nodes=[];
+    clearInterval(pTmr);tOff+=c.currentTime-tStart;playing=false;
+    document.getElementById('playBtn').textContent='▶';
+    document.getElementById('tkSub').innerHTML='Paused';
+  } else {
+    if(c.state==='suspended')c.resume();
+    tStart=c.currentTime;playTk(tStart);playing=true;
+    document.getElementById('playBtn').textContent='⏸';setUI();
+    pTmr=setInterval(function(){
+      if(!playing)return;
+      var el=(ac().currentTime-tStart)+tOff;
+      var pct=Math.min(el/DUR*100,100);
+      document.getElementById('progFg').style.width=pct+'%';
+      var s=Math.floor(el);
+      document.getElementById('timeTxt').textContent=Math.floor(s/60)+':'+(('0'+(s%60)).slice(-2));
+      if(el>=DUR){
+        nodes.forEach(function(n){try{n.stop();}catch(e){}});nodes=[];
+        tOff=0;tStart=ac().currentTime;tkIdx++;playTk(tStart);setUI();
+        document.getElementById('progFg').style.width='0%';
+      }
+    },350);
+  }
+}
+
+// Autoplay on first user interaction (required by browser autoplay policy)
+(function(){
+  function startOnInteraction(){
+    if(!playing){ togglePlay(); }
+    ['click','touchstart','keydown'].forEach(function(e){
+      document.removeEventListener(e,startOnInteraction);
+    });
+  }
+  ['click','touchstart','keydown'].forEach(function(e){
+    document.addEventListener(e,startOnInteraction,{once:true,passive:true});
+  });
+})();
+</script>
 </body>
 </html>
